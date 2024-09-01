@@ -619,8 +619,8 @@ EOF
     fi
   fi
 
-  # This starts the container and executes <app>-install.sh
-  msg_info "Starting LXC Container"
+  # Wait for user confirmation to start the container and execute <app>-install.sh
+  read -p "Press a key to start LXC container $CTID... " -n1 -s
   pct start "$CTID"
   msg_ok "Started LXC Container"
   if [ "$var_os" == "alpine" ]; then
