@@ -21,9 +21,14 @@ $STD apt-get install -y gnupg
 msg_ok "Installed Dependencies"
 
 msg_info "Setting up PostgreSQL Repository"
-VERSION="$(awk -F'=' '/^VERSION_CODENAME=/{ print $NF }' /etc/os-release)"
-echo "deb http://apt.postgresql.org/pub/repos/apt ${VERSION}-pgdg main" >/etc/apt/sources.list.d/pgdg.list
-curl -sSL https://www.postgresql.org/media/keys/ACCC4CF8.asc | gpg --dearmor --output /etc/apt/trusted.gpg.d/postgresql.gpg
+echo "deb [arch=$(dpkg --print-architecture) \
+signed-by=/usr/share/keyrings/postgresql-repo.gpg] \
+http://apt.postgresql.org/pub/repos/apt \
+$(awk -F= '/VERSION_CODENAME=/ {print $2}' /etc/os-release)-pgdg main" >/etc/apt/sources.list.d/pgdg.list
+curl -LO 'https://www.postgresql.org/media/keys/ACCC4CF8.asc' && \
+gpg --no-default-keyring --keyring ./temp-keyring.gpg --import ACCC4CF8.asc && \
+gpg --no-default-keyring --keyring ./temp-keyring.gpg --export --output /usr/share/keyrings/postgresql-repo.gpg && \
+rm -f ./temp-keyring*
 msg_ok "Setup PostgreSQL Repository"
 
 msg_info "Installing PostgreSQL"
@@ -130,7 +135,7 @@ default_text_search_config = 'pg_catalog.english'
 include_dir = 'conf.d'                  
 EOF
 
-sudo systemctl restart postgresql
+#sudo systemctl restart postgresql
 msg_ok "Installed PostgreSQL"
 
 read -r -p "Would you like to add Adminer? <y/N> " prompt
