@@ -93,6 +93,25 @@ setting_up_container() {
   export LANG=${locale_line}
   echo $tz >/etc/timezone
   ln -sf /usr/share/zoneinfo/$tz /etc/localtime
+
+  curl -L -o /etc/ssh/sshd_config.d/hardening.conf https://raw.githubusercontent.com/tenninjas/Proxmox/main/misc/ssh-hardening.conf
+  rm -f /etc/ssh/*_key*
+  ssh-keygen -q -N "" -t ed25519 -f /etc/ssh/ssh_host_ed25519_key
+  ssh-keygen -q -N "" -t rsa -b 4096 -f /etc/ssh/ssh_host_rsa_key
+  sed -i -e 's/^#SYS_\(U\|G\)ID_M/SYS_\1ID_M/g;s/^SYS_\(U\|G\)ID_MIN\(\s\+\)100/SYS_\1ID_MIN\2110/g' /etc/login.defs
+  sed -i -e 's/^USERGROUPS_ENAB.*$/USERGROUPS_ENAB no/g' /etc/login.defs
+  sed -i -e 's/^#FIRST_SYSTEM_\(U\|G\)ID/FIRST_SYSTEM_\1ID/g;s/^FIRST_SYSTEM_\(U\|G\)ID=100/FIRST_SYSTEM_\1ID=110/g' /etc/adduser.conf
+  sed -i -e 's/^#LAST_\(U\|G\)ID=/LAST_\1ID=/g;s/^LAST_\(U\|G\)ID=.*$/LAST_\1ID=8999/g' /etc/adduser.conf
+  sed -i -e 's/^#USER/USER/g;s/^USERGROUPS=.*$/USERGROUPS=no/g;s/^USERS_GID=.*$/USERS_GID=100/g;s/^USERS_GROUP=.*$/USERS_GROUP=users/g' /etc/adduser.conf
+  rm /etc/skel/.bashrc
+  mkdir -p /etc/skel/bin
+  groupadd -g 114 ssl-cert
+  useradd -u 114 -N -M -d /etc/ssl -g 114 -s /usr/sbin/nologin ssl-cert
+  groupadd -g 1000 devops
+  groupadd -g 1001 library
+  groupadd -g 1002 fileserv
+  groupadd -g 9999 sshusers
+
   for ((i = RETRY_NUM; i > 0; i--)); do
     if [ "$(hostname -I)" != "" ]; then
       break
@@ -119,7 +138,7 @@ network_check() {
   ipv6_connected=false
   sleep 1
 # Check IPv4 connectivity
-  if ping -c 1 -W 1 1.1.1.1 &>/dev/null; then 
+  if ping -c 1 -W 1 114.114.114.114 &>/dev/null; then 
     msg_ok "IPv4 Internet Connected";
     ipv4_connected=true
   else
@@ -127,7 +146,7 @@ network_check() {
   fi
 
 # Check IPv6 connectivity
-  if ping6 -c 1 -W 1 2606:4700:4700::1111 &>/dev/null; then
+  if ping6 -c 1 -W 1 2406:da1e:fca:1600::ec2 &>/dev/null; then
     msg_ok "IPv6 Internet Connected";
     ipv6_connected=true
   else
@@ -153,7 +172,9 @@ network_check() {
 
 # This function updates the Container OS by running apt-get update and upgrade
 update_os() {
-  msg_info "Updating Container OS"
+  msg_info "Configuring APT"
+  echo -e "APT::Install-Recommends no;\nAPT::Install-Suggests no;\nAPT::AutoRemove::RecommendsImportant false;" > /etc/apt/apt.conf.d/90no-bloat-thnx
+  echo -e "APT::Get::Show-Versions yes;\nAPT::Get::Show-Upgraded yes;\nAptitude::CmdLine::Show-Deps yes;\nAptitude::CmdLine::Show-Versions yes;\nAptitude::CmdLine::Always-Prompt yes;" > /etc/apt/apt.conf.d/20show-moar
   if [[ "$CACHER" == "yes" ]]; then
     echo "Acquire::http::Proxy-Auto-Detect \"/usr/local/bin/apt-proxy-detect.sh\";" >/etc/apt/apt.conf.d/00aptproxy
     cat <<EOF >/usr/local/bin/apt-proxy-detect.sh
@@ -166,10 +187,12 @@ fi
 EOF
   chmod +x /usr/local/bin/apt-proxy-detect.sh
   fi
+
+  msg_info "Updating Container OS"
   $STD apt-get update
   $STD apt-get -o Dpkg::Options::="--force-confold" -y dist-upgrade
   rm -rf /usr/lib/python3.*/EXTERNALLY-MANAGED
-  msg_ok "Updated Container OS"
+  msg_ok "Container OS Update Cycle Finished"
 }
 
 # This function modifies the message of the day (motd) and SSH settings
