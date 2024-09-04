@@ -94,7 +94,7 @@ setting_up_container() {
   echo $tz >/etc/timezone
   ln -sf /usr/share/zoneinfo/$tz /etc/localtime
 
-  curl -L -o /etc/ssh/sshd_config.d/hardening.conf https://raw.githubusercontent.com/tenninjas/Proxmox/main/misc/ssh-hardening.conf
+  wget -qLO /etc/ssh/sshd_config.d/hardening.conf https://raw.githubusercontent.com/tenninjas/Proxmox/main/misc/ssh-hardening.conf
   rm -f /etc/ssh/*_key*
   ssh-keygen -q -N "" -t ed25519 -f /etc/ssh/ssh_host_ed25519_key
   ssh-keygen -q -N "" -t rsa -b 4096 -f /etc/ssh/ssh_host_rsa_key
