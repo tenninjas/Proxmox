@@ -105,8 +105,8 @@ setting_up_container() {
   sed -i -e 's/^#USER/USER/g;s/^USERGROUPS=.*$/USERGROUPS=no/g;s/^USERS_GID=.*$/USERS_GID=100/g;s/^USERS_GROUP=.*$/USERS_GROUP=users/g' /etc/adduser.conf
   rm /etc/skel/.bashrc
   mkdir -p /etc/skel/bin
-  groupadd -g 114 ssl-cert
-  useradd -u 114 -N -M -d /etc/ssl -g 114 -s /usr/sbin/nologin ssl-cert
+  #groupadd -g 114 ssl-cert
+  #useradd -u 114 -N -M -d /etc/ssl -g 114 -s /usr/sbin/nologin ssl-cert
   groupadd -g 1000 devops
   groupadd -g 1001 library
   groupadd -g 1002 fileserv
