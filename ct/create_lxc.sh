@@ -164,7 +164,7 @@ mapfile -t TEMPLATES < <((pveam available -section system; pveam list local | aw
 [ ${#TEMPLATES[@]} -gt 0 ] || exit "Unable to find a template when searching for '$TEMPLATE_SEARCH'."
 TEMPLATE="${TEMPLATES[-1]}"
 
-msg_info "Best matching template: $TEMPLATE"
+msg_ok "Best matching template: $TEMPLATE"
 
 # Download LXC template if needed
 if ! pveam list $TEMPLATE_STORAGE | grep -q $TEMPLATE; then

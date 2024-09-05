@@ -98,7 +98,7 @@ setting_up_container() {
   rm -f /etc/ssh/*_key*
   ssh-keygen -q -N "" -t ed25519 -f /etc/ssh/ssh_host_ed25519_key
   ssh-keygen -q -N "" -t rsa -b 4096 -f /etc/ssh/ssh_host_rsa_key
-  chown root:ssl-cert /etc/ssl >/dev/null
+  chown -R root:ssl-cert /etc/ssl >/dev/null
   chmod g+w /etc/ssl >/dev/null
 
   for ((i = RETRY_NUM; i > 0; i--)); do
