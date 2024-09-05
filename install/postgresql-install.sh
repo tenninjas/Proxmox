@@ -16,7 +16,6 @@ update_os
 msg_info "Installing Dependencies"
 $STD apt-get install -y curl
 $STD apt-get install -y sudo
-$STD apt-get install -y mc
 $STD apt-get install -y gnupg
 msg_ok "Installed Dependencies"
 
@@ -33,6 +32,7 @@ msg_ok "Setup PostgreSQL Repository"
 
 msg_info "Installing PostgreSQL"
 $STD apt-get update
+$STD groupadd -o -g 132 postgres
 $STD apt-get install -y postgresql
 
 cat <<EOF >/etc/postgresql/16/main/pg_hba.conf

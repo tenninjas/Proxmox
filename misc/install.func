@@ -98,19 +98,8 @@ setting_up_container() {
   rm -f /etc/ssh/*_key*
   ssh-keygen -q -N "" -t ed25519 -f /etc/ssh/ssh_host_ed25519_key
   ssh-keygen -q -N "" -t rsa -b 4096 -f /etc/ssh/ssh_host_rsa_key
-  #sed -i -e 's/^#SYS_\(U\|G\)ID_M/SYS_\1ID_M/g;s/^SYS_\(U\|G\)ID_MIN\(\s\+\)100/SYS_\1ID_MIN\2110/g' /etc/login.defs
-  #sed -i -e 's/^USERGROUPS_ENAB.*$/USERGROUPS_ENAB no/g' /etc/login.defs
-  #sed -i -e 's/^#FIRST_SYSTEM_\(U\|G\)ID/FIRST_SYSTEM_\1ID/g;s/^FIRST_SYSTEM_\(U\|G\)ID=100/FIRST_SYSTEM_\1ID=110/g' /etc/adduser.conf
-  #sed -i -e 's/^#LAST_\(U\|G\)ID=/LAST_\1ID=/g;s/^LAST_\(U\|G\)ID=.*$/LAST_\1ID=8999/g' /etc/adduser.conf
-  #sed -i -e 's/^#USER/USER/g;s/^USERGROUPS=.*$/USERGROUPS=no/g;s/^USERS_GID=.*$/USERS_GID=100/g;s/^USERS_GROUP=.*$/USERS_GROUP=users/g' /etc/adduser.conf
-  #rm /etc/skel/.bashrc
-  #mkdir -p /etc/skel/bin
-  #groupadd -g 114 ssl-cert
-  #useradd -u 114 -N -M -d /etc/ssl -g 114 -s /usr/sbin/nologin ssl-cert
-  #groupadd -g 1000 devops
-  #groupadd -g 1001 library
-  #groupadd -g 1002 fileserv
-  #groupadd -g 9999 sshusers
+  chown root:ssl-cert /etc/ssl >/dev/null
+  chmod g+w /etc/ssl >/dev/null
 
   for ((i = RETRY_NUM; i > 0; i--)); do
     if [ "$(hostname -I)" != "" ]; then
