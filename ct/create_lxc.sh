@@ -164,6 +164,8 @@ mapfile -t TEMPLATES < <((pveam available -section system; pveam list local | aw
 [ ${#TEMPLATES[@]} -gt 0 ] || exit "Unable to find a template when searching for '$TEMPLATE_SEARCH'."
 TEMPLATE="${TEMPLATES[-1]}"
 
+msg_info "Best matching template: $TEMPLATE"
+
 # Download LXC template if needed
 if ! pveam list $TEMPLATE_STORAGE | grep -q $TEMPLATE; then
   msg_info "Downloading LXC Template"
@@ -183,6 +185,6 @@ PCT_OPTIONS=(${PCT_OPTIONS[@]:-${DEFAULT_PCT_OPTIONS[@]}})
 msg_info "Creating LXC Container"
 echo "[Debug] pct create $CTID ${TEMPLATE_STORAGE}:vztmpl/${TEMPLATE} ${PCT_OPTIONS[@]}"
 read -p "Press a key to create LXC container $CTID... " -n1 -s
-pct create $CTID ${TEMPLATE_STORAGE}:vztmpl/${TEMPLATE} ${PCT_OPTIONS[@]} ||
+pct create $CTID ${TEMPLATE_STORAGE}:vztmpl/${TEMPLATE} ${PCT_OPTIONS[@]} >/dev/null ||
   exit "A problem occured while trying to create container."
 msg_ok "LXC Container ${BL}$CTID${CL} ${GN}was successfully created."
