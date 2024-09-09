@@ -21,7 +21,7 @@ header_info
 echo -e "Loading..."
 APP="Collabora"
 var_disk="12"
-var_cpu="1"
+var_cpu="2"
 var_ram="1024"
 var_os="debian"
 var_version="12"
@@ -68,4 +68,4 @@ build_container
 description
 
 msg_ok "Completed Successfully!\n"
-echo -e "${APP} needs to be behind a proxy (Nginx Proxy Manager)."
+echo -e "https://github.com/tteck/Proxmox/discussions/3651"
