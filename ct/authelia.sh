@@ -8,18 +8,18 @@ source <(curl -s https://raw.githubusercontent.com/tenninjas/Proxmox/main/misc/b
 function header_info {
 clear
 cat <<"EOF"
-    ____    __          
-   / / /___/ /___ _____ 
-  / / / __  / __ `/ __ \
- / / / /_/ / /_/ / /_/ /
-/_/_/\__,_/\__,_/ .___/ 
-               /_/      
- 
+             _   _          _    __    __
+            | | | |        | |  / /   / /
+  __ _ _   _| |_| |__   ___| | / /___/ /___ _____ 
+ / _` | | | | __| '_ \ / _ \ |/ / __  / __ `/ __ \
+| (_| | |_| | |_| | | |  __/ | / /_/ / /_/ / /_/ /
+ \__,_|\__,_|\__|_| |_|\___|_|/\__,_/\__,_/ .___/ 
+                                         /_/ 
 EOF
 }
 header_info
 echo -e "Loading..."
-APP="lldap"
+APP="authelldap"
 var_disk="4"
 var_cpu="1"
 var_ram="512"
@@ -55,10 +55,11 @@ function default_settings() {
 
 function update_script() {
 header_info
-if [[ ! -f /etc/systemd/system/lldap.service ]]; then msg_error "No ${APP} Installation Found!"; exit; fi
+if [[ ! -f /etc/systemd/system/lldap.service ]]; then msg_error "No LLDAP Installation Found!"; exit; fi
+if [[ ! -f /etc/systemd/system/authelia.service ]]; then msg_error "No Authelia Installation Found!"; exit; fi
 msg_info "Updating $APP"
 apt update
-apt upgrade -y lldap
+apt upgrade -y lldap authelia
 msg_ok "Updated $APP"
 exit
 }
@@ -68,5 +69,8 @@ build_container
 description
 
 msg_ok "Completed Successfully!\n"
-echo -e "${APP} should be reachable by going to the following URL.
-         ${BL}http://${IP}:17170${CL} \n"
+echo -e "LLDAP's WebUI should be reachable by going to the following URL:
+     ${BL}http://${IP}:17170${CL}\n
+You will need to create a secure user for authelia before integrating it. Please read more at:
+     https://www.authelia.com/integration/ldap/introduction/#lldap
+"

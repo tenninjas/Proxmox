@@ -21,7 +21,6 @@ update_os
 msg_info "Installing Dependencies"
 $STD apt-get install -y curl
 $STD apt-get install -y sudo
-$STD apt-get install -y mc
 $STD apt-get install -y gpg
 msg_ok "Installed Dependencies"
 
@@ -33,25 +32,31 @@ if [ "$os" == "ubuntu" ]; then
 else
   DISTRO="${os^}"
 fi
-echo "deb http://download.opensuse.org/repositories/home:/Masgalor:/LLDAP/${DISTRO}_${VERSION_ID}/ /" >/etc/apt/sources.list.d/home:Masgalor:LLDAP.list
-curl -fsSL https://download.opensuse.org/repositories/home:Masgalor:LLDAP/${DISTRO}_${VERSION_ID}/Release.key | gpg --dearmor >/etc/apt/trusted.gpg.d/home_Masgalor_LLDAP.gpg
-
-
 echo "deb [arch=$(dpkg --print-architecture) \
-signed-by=/usr/share/keyrings/postgresql-repo.gpg] \
-http://apt.postgresql.org/pub/repos/apt \
-$(awk -F= '/VERSION_CODENAME=/ {print $2}' /etc/os-release)-pgdg main" >/etc/apt/sources.list.d/pgdg.list
-curl -LO 'https://www.postgresql.org/media/keys/ACCC4CF8.asc' && \
-gpg --no-default-keyring --keyring ./temp-keyring.gpg --import ACCC4CF8.asc && \
-gpg --no-default-keyring --keyring ./temp-keyring.gpg --export --output /usr/share/keyrings/postgresql-repo.gpg && \
-rm -f ./temp-keyring*
+signed-by=/usr/share/keyrings/lldap-repo.gpg] \
+http://download.opensuse.org/repositories/home:/Masgalor:/LLDAP/${DISTRO}_${VERSION_ID}/ /" >/etc/apt/sources.list.d/lldap.list
+curl -o Masgalor-LLDAP.key -L "https://download.opensuse.org/repositories/home:Masgalor:LLDAP/${DISTRO}_${VERSION_ID}/Release.key" && \
+gpg --no-default-keyring --keyring ./temp-keyring.gpg --import Masgalor-LLDAP.key && \
+gpg --no-default-keyring --keyring ./temp-keyring.gpg --export --output /usr/share/keyrings/lldap-repo.gpg && \
+rm -f ./temp-keyring* ./Masgalor-LLDAP.key
+echo "deb [arch=$(dpkg --print-architecture) \
+signed-by=/usr/share/keyrings/authelia-repo.gpg] \
+https://apt.authelia.com/stable/debian/debian all main" >/etc/apt/sources.list.d/authelia.list
+curl -o authelia.asc -L "https://apt.authelia.com/organization/signing.asc" && \
+gpg --no-default-keyring --keyring ./temp-keyring.gpg --import authelia.asc && \
+gpg --no-default-keyring --keyring ./temp-keyring.gpg --export --output /usr/share/keyrings/authelia-repo.gpg && \
+rm -f ./temp-keyring* ./authelia.asc
+$STD apt update
 msg_ok "Repositories Set Up"
 
 msg_info "Installing lldap"
-$STD apt update
 $STD apt install -y lldap
 systemctl enable -q --now lldap
 msg_ok "Installed lldap"
+
+msg_info "Installing authelia"
+$STD apt install -y authelia
+msg_ok "Installed authelia"
 
 motd_ssh
 customize
